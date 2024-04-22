@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import personService from './services/persons';
 import Person from './components/Person';
 import Filter from './components/Filter';
 import PersonForm from './components/PersonForm';
@@ -12,23 +12,40 @@ const App = () => {
     (person) => person.name.toLowerCase().indexOf(searchPerson.toLowerCase()) > -1,
   );
 
+  const handlePersons = (data) => {
+    setPersons(data);
+  };
+
+  const handleSearchPerson = (data) => {
+    setSearchPerson(data);
+  };
+
+  const removePerson = (id, name) => {
+    if (confirm(`Delete ${name}`)) {
+      personService.remove(id).then((personData) => {
+        setPersons(filteredPersons.filter((person) => person.id !== personData.id));
+      });
+    }
+  };
+
   useEffect(() => {
-    console.log('effect');
-    axios.get('http://localhost:3001/persons').then((response) => {
-      console.log(response);
-      setPersons(response.data);
-    });
+    personService
+      .getAll()
+      .then((personData) => {
+        setPersons(personData);
+      })
+      .catch((e) => console.log(e.message));
   }, []);
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <Filter searchPerson={searchPerson} setSearchPerson={setSearchPerson} />
+      <Filter searchPerson={searchPerson} handleSearchPerson={handleSearchPerson} />
       <h2>add a new </h2>
-      <PersonForm persons={filteredPersons} setPersons={setPersons} />
+      <PersonForm persons={filteredPersons} handlePersons={handlePersons} />
       <h2>Numbers</h2>
       {filteredPersons.map((person) => (
-        <Person key={person.id} name={person.name} number={person.number} />
+        <Person key={person.id} person={person} removePerson={removePerson} />
       ))}
     </div>
   );

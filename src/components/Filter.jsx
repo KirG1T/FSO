@@ -1,6 +1,6 @@
-const Filter = ({ searchPerson, setSearchPerson }) => {
+const Filter = ({ searchPerson, handleSearchPerson }) => {
   const handleSearchChange = (e) => {
-    setSearchPerson(e.target.value);
+    handleSearchPerson(e.target.value);
   };
   return (
     <div>
