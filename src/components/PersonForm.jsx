@@ -16,23 +16,29 @@ const PersonForm = ({ persons, handlePersons }) => {
 
   const addPerson = (e) => {
     e.preventDefault();
-    const checkPerson = persons.find((person) => newName === person.name);
+    const checkPerson = persons.find((person) => newName.trim() === person.name);
+
     if (checkPerson) {
-      alert(`${newName} is already added to phonebook`);
+      if (confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        const newData = { ...checkPerson, number: newNumber };
+        personService.update(checkPerson.id, newData).then((personData) => {
+          handlePersons(persons.map((person) => (person.id !== checkPerson.id ? person : personData)));
+          setNewName('');
+          setNewNumber('');
+        });
+      }
     } else {
-      handlePersons([...persons, { name: newName, number: newNumber, id: Math.random() * 0.1 }]);
+      const personObject = {
+        name: newName,
+        number: newNumber,
+      };
+
+      personService.create(personObject).then((personData) => {
+        handlePersons(persons.concat(personData));
+        setNewName('');
+        setNewNumber('');
+      });
     }
-
-    const personObject = {
-      name: newName,
-      number: newNumber,
-    };
-
-    personService.create(personObject).then((personData) => {
-      handlePersons(persons.concat(personData));
-      setNewName('');
-      setNewNumber('');
-    });
   };
 
   return (
